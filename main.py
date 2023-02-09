@@ -24,7 +24,11 @@ def upsample_image(image, upsample_factor):
     new_cols = int(cols * upsample_factor)
     upsampled_image = cv2.resize(image, (new_cols, new_rows), interpolation=cv2.INTER_CUBIC)
     
-    return upsampled_image
+    # Apply a sharpening filter to the upsampled image
+    kernel = np.array([[-1,-1,-1], [-1,9,-1], [-1,-1,-1]])
+    sharpened_image = cv2.filter2D(upsampled_image, -1, kernel)
+    
+    return sharpened_image
 
 # Load a base image
 image = cv2.imread('hotdawg.jpg')
