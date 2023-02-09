@@ -5,8 +5,12 @@ def downsample_image(image, downsample_factor):
     # Convert image from BGR to RGB
     image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
     
+    # Apply a Gaussian filter to the image
+    image = cv2.GaussianBlur(image, (5, 5), 0)
+    
     # Downsample the image
-    downsampled_image = image[::downsample_factor, ::downsample_factor, :]
+    rows, cols, _ = image.shape
+    downsampled_image = cv2.resize(image, (cols//downsample_factor, rows//downsample_factor), interpolation=cv2.INTER_AREA)
     
     return downsampled_image
 
@@ -14,9 +18,11 @@ def upsample_image(image, upsample_factor):
     # Convert image from BGR to RGB
     image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
     
-    # Upsample the image
+    # Upsample the image using bicubic interpolation
     rows, cols, _ = image.shape
-    upsampled_image = np.repeat(np.repeat(image, upsample_factor, axis=0), upsample_factor, axis=1)
+    new_rows = int(rows * upsample_factor)
+    new_cols = int(cols * upsample_factor)
+    upsampled_image = cv2.resize(image, (new_cols, new_rows), interpolation=cv2.INTER_CUBIC)
     
     return upsampled_image
 
