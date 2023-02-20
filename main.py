@@ -1,9 +1,54 @@
+# Muhammad Umar Khan
+# 400167784 | khanm214
+
 import cv2
 import numpy as np
+
+def rgb_to_yuv(rgb_image):
+    # Get the red, green, and blue channels of the image
+    r = rgb_image[:,:,0]
+    g = rgb_image[:,:,1]
+    b = rgb_image[:,:,2]
+
+    # Calculate the Y, U, and V channels
+    y = 0.299*r + 0.587*g + 0.114*b
+    u = -0.14713*r - 0.28886*g + 0.436*b
+    v = 0.615*r - 0.51498*g - 0.10001*b
+
+    # Combine the Y, U, and V channels into a single image
+    yuv_image = np.zeros(rgb_image.shape, dtype=np.uint8)
+    yuv_image[:,:,0] = y
+    yuv_image[:,:,1] = u
+    yuv_image[:,:,2] = v
+
+    return yuv_image
+
+def yuv_to_rgb(yuv_image):
+    # Get the Y, U, and V channels of the image
+    y = yuv_image[:,:,0]
+    u = yuv_image[:,:,1]
+    v = yuv_image[:,:,2]
+
+    # Convert YUV to RGB
+    r = y + 1.13983*v
+    g = y - 0.39465*u - 0.5806*v
+    b = y + 2.03211*u
+
+    # Combine the R, G, and B channels into a single image
+    rgb_image = np.zeros(yuv_image.shape)
+    rgb_image[:,:,0] = r
+    rgb_image[:,:,1] = g
+    rgb_image[:,:,2] = b
+
+    return rgb_image
 
 def downsize_image(input_file, output_file, factor):
     # Decode the image into a list of RGB tuples
     data = cv2.imread(input_file)
+    data = rgb_to_yuv(data)
+    print(data[:,:,0])
+    print(data[:,:,1])
+    print(data[:,:,2])
     
     # Calculate the new size of the image
     new_width = int(len(data[0]) / factor)
@@ -101,10 +146,13 @@ def bicubic_upsample(input_file, output_file, factor):
     
     # Convert the list of tuples to a 3D Numpy array
     upsampled_image = np.array(new_pixels, dtype=np.uint8)
+    
+    # Convert from YCbCr to RGB
+    upsampled_image = yuv_to_rgb(upsampled_image)
 
     # Save the upsampled image as a new image file
     cv2.imwrite(output_file, upsampled_image)
 
 # Example usage, bicubic upsample takes a long time, downsize is much faster, dont use both at the same time
-downsize_image("hotdawg.jpg", "downsampled_hotdawg.jpg", 4)
-# bicubic_upsample("downsampled_hotdawg.jpg", "upsampled_hotdawg.jpg", 4)
+downsize_image("plant-based-food.jpg", "downsampled_plant-based-food.jpg", 2)
+# bicubic_upsample("downsampled_plant-based-food.jpg", "upsampled_plant-based-food.jpg", 4)
